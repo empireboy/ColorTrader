@@ -14,7 +14,7 @@ public class OutOfRangeState : RangeState
 
     public override void StateEnter()
     {
-        _rangeEventHandler.OutOfRange();
+        if (_rangeEventHandler.OutOfRange != null) _rangeEventHandler.OutOfRange();
     }
 
     public override bool Reason()

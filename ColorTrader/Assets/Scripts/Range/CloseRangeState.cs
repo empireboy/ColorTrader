@@ -14,7 +14,7 @@ public class CloseRangeState : RangeState
 
     public override void StateEnter()
     {
-        _rangeEventHandler.CloseRange();
+        if (_rangeEventHandler.CloseRange != null) _rangeEventHandler.CloseRange();
     }
 
     public override bool Reason()
