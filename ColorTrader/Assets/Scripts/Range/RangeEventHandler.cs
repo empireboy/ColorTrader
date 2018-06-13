@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(CloseRangeState))]
+[RequireComponent(typeof(OutOfRangeState))]
 public class RangeEventHandler : MonoBehaviour
 {
     public delegate void CloseRangeEventHandler();
@@ -8,22 +10,20 @@ public class RangeEventHandler : MonoBehaviour
     public delegate void OutOfRangeEventHandler();
     public OutOfRangeEventHandler OutOfRange;
 
-    [SerializeField] private readonly float _range;
+    public enum RangeStates { CloseRange, OutOfRange }
 
-    private RangeState _currentState;
-    [SerializeField] private RangeState[] _rangeStates;
+    [SerializeField] private RangeState _currentState;
+    private RangeState _closeRangeState;
+    private RangeState _outOfRangeState;
 
-    private void Update()
+    private void Start()
     {
-        /*if (InRange(Player.Instance.transform.position, _range))
-        {
-            if (CloseRange != null) CloseRange();
-        }
+        _closeRangeState = gameObject.GetComponent<CloseRangeState>();
+        _outOfRangeState = gameObject.GetComponent<OutOfRangeState>();
 
-        if (!InRange(Player.Instance.transform.position, _range))
-        {
-            if (OutOfRange != null) OutOfRange();
-        }*/
+        _currentState = _closeRangeState;
+
+        ChangeState(RangeStates.CloseRange);
     }
 
     private IEnumerator StateMachine()
@@ -36,9 +36,28 @@ public class RangeEventHandler : MonoBehaviour
         }
     }
 
+    public void ChangeState(RangeStates newState)
+    {
+        switch (newState)
+        {
+            case RangeStates.CloseRange:
+                _currentState = _closeRangeState;
+                break;
+            case RangeStates.OutOfRange:
+                _currentState = _outOfRangeState;
+                break;
+        }
+        StartCoroutine(StateMachine());
+    }
+
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, _range);
+        if (_currentState != _outOfRangeState)
+        {
+            Gizmos.color = Color.blue;
+        }
+        else Gizmos.color = Color.black;
+
+        Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y + 4, transform.position.z), 0.5f);
     }
 }
